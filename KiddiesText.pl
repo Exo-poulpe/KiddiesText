@@ -42,53 +42,68 @@ GetOptions(
 ) or die($helpText);
 
 sub main() {
-    if ( $help eq 1 ) {
+    if ( $help eq 1 ) 
+    {
         print( ${helpText} );
     }
-    elsif ( $text ne "" ) {
+    elsif ( $text ne "" ) 
+    {
         my $start = Time::HiRes::gettimeofday();
         $text   = lc($text);
         $result = ConvertText($text);
-        print( color('green') );
-        print("$result\n");
-        print( color('reset') );
+        ColorPrint( $result, 'green' );
         my $stop = Time::HiRes::gettimeofday();
+
         if ( $timer eq 1 ) {
             printf( "%.3f sec\n", $stop - $start );
         }
     }
-    elsif ( $file ne "" ) {
+    elsif ( $file ne "" ) 
+    {
         my $start = Time::HiRes::gettimeofday();
         my $line  = "";
-        open( DATA, "< ${file}" ) or die "Couldn't open file ${file}, $!";
+        open( DATA, "< ${file}" )
+          or die ColorPrint( "Couldn't open file : ${file}, $!", 'red' );
+
         while (<DATA>) {
             chomp($_);
             $line = $_;
             $lineNumber++;
             if ( $verbose eq 1 ) {
-                print( '=' x 25 );
-                print( color('blue') );
-                print("\n$line\n");
-                print( color('reset') );
+                my $tmp = '=' x 25;
+                $tmp .= "\n";
+                print($tmp);
+                ColorPrint( $line, 'blue' );
             }
             $result = ConvertText($line);
             if ( $quiet eq 0 ) {
-                print( color('green') );
-                print("$result\n");
-                print( color('reset') );
+                ColorPrint( $result, 'green' );
             }
         }
+
         my $stop = Time::HiRes::gettimeofday();
-        if ( $timer eq 1 ) {
+
+        if ( $timer eq 1 ) 
+        {
             printf( "%.3f sec\n", $stop - $start );
         }
-        if ( $count eq 1 ) {
+
+        if ( $count eq 1 ) 
+        {
             print("Number of Line : ${lineNumber}\n");
         }
     }
-    else {
+    else 
+    {
         print( ${helpText} );
     }
+}
+
+sub ColorPrint($$) {
+    my ( $data, $color ) = @_;
+    print( color($color) );
+    print("$data\n");
+    print( color('reset') );
 }
 
 sub ConvertText($) {
@@ -102,6 +117,7 @@ sub ConvertText($) {
         }
         $presult .= ConvertChar($tmp);
     }
+
     return $presult;
 }
 
@@ -113,14 +129,15 @@ sub ConvertChar($) {
     elsif ( $char eq "s" ) { $char = "\$"; }
     elsif ( $char eq "o" ) { $char = "0"; }
     elsif ( $char eq "b" ) { $char = "8"; }
-    else {
+    else 
+    {
         $char = $char;
     }
+    
     if ( $verbose eq 1 ) {
 
         print("char return : $char\n\n");
     }
     return $char;
 }
-
 main();
