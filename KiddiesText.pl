@@ -4,11 +4,12 @@ use strict;
 use safe;
 use Getopt::Long;
 use Time::Hires;
+use Time::Seconds;
 use Term::ANSIColor;
 
 Getopt::Long::Configure("bundling");
 
-my $helpText = "Usage : 
+my $helpText = "Usage : \n
 --text | -t\t: text to convert
 --file | -f\t: file to convert
 --timer\t\t: print time used
@@ -42,12 +43,10 @@ GetOptions(
 ) or die($helpText);
 
 sub main() {
-    if ( $help eq 1 ) 
-    {
+    if ( $help eq 1 ) {
         print( ${helpText} );
     }
-    elsif ( $text ne "" ) 
-    {
+    elsif ( $text ne "" ) {
         my $start = Time::HiRes::gettimeofday();
         $text   = lc($text);
         $result = ConvertText($text);
@@ -58,8 +57,7 @@ sub main() {
             printf( "%.3f sec\n", $stop - $start );
         }
     }
-    elsif ( $file ne "" ) 
-    {
+    elsif ( $file ne "" ) {
         my $start = Time::HiRes::gettimeofday();
         my $line  = "";
         open( DATA, "< ${file}" )
@@ -83,18 +81,17 @@ sub main() {
 
         my $stop = Time::HiRes::gettimeofday();
 
-        if ( $timer eq 1 ) 
-        {
-            printf( "%.3f sec\n", $stop - $start );
+        if ( $timer eq 1 ) {
+            my $elapsed = Time::Seconds->new( $stop - $start );
+            $elapsed = $elapsed->pretty;
+            print("Time elpased : ${elapsed}\n");
         }
 
-        if ( $count eq 1 ) 
-        {
+        if ( $count eq 1 ) {
             print("Number of Line : ${lineNumber}\n");
         }
     }
-    else 
-    {
+    else {
         print( ${helpText} );
     }
 }
@@ -129,11 +126,10 @@ sub ConvertChar($) {
     elsif ( $char eq "s" ) { $char = "\$"; }
     elsif ( $char eq "o" ) { $char = "0"; }
     elsif ( $char eq "b" ) { $char = "8"; }
-    else 
-    {
+    else {
         $char = $char;
     }
-    
+
     if ( $verbose eq 1 ) {
 
         print("char return : $char\n\n");
