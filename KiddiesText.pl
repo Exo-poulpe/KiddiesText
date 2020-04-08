@@ -1,4 +1,5 @@
 #!/bin/perl
+# Description : This program convert text to Kiddies text from file or text
 use warnings;
 use strict;
 use safe;
@@ -9,13 +10,19 @@ use Term::ANSIColor;
 
 Getopt::Long::Configure("bundling");
 
-my $helpText = "Usage : \n
---text | -t\t: text to convert
---file | -f\t: file to convert
+my $helpText = "
+Description : This program convert text to Kiddies text from file or text
+
+Usage : \n
+--text    | -t\t: text to convert
+--file    | -f\t: file to convert
+--output  | -o\t: output file to save data (use --stdout for print output) *override file
 --timer\t\t: print time used
 --quiet\t\t: less output info
 --count\t\t: count line processed
---help | -h\t: print this help
+--stdout\t: print result text for file output (only with output flag)
+--help    | -h\t: print this help
+--verbose | -v\t: print more verbose
 
 \n\nExample :
 
@@ -29,17 +36,21 @@ my $quiet      = 0;
 my $count      = 0;
 my $timer      = 0;
 my $lineNumber = 0;
+my $stdout     = 0;
 my $text       = "";
+my $output     = "";
 my $file       = "";
 my $result     = "";
 GetOptions(
-    "text|t=s"  => \$text,       # string
-    "file|f=s"  => \$file,       # string
-    "verbose|v" => \$verbose,    # flag
-    "quiet"     => \$quiet,      # flag
-    "timer"     => \$timer,      # flag
-    "count"     => \$count,      # flag
-    "help|h|?"  => \$help,       # flag
+    "text|t=s"   => \$text,       # string
+    "file|f=s"   => \$file,       # string
+    "output|o=s" => \$output,     # string
+    "verbose|v"  => \$verbose,    # flag
+    "quiet"      => \$quiet,      # flag
+    "timer"      => \$timer,      # flag
+    "count"      => \$count,      # flag
+    "stdout"     => \$stdout,     # flag
+    "help|h|?"   => \$help,       # flag
 ) or die($helpText);
 
 sub main() {
@@ -50,7 +61,7 @@ sub main() {
         my $start = Time::HiRes::gettimeofday();
         $text   = lc($text);
         $result = ConvertText($text);
-        ColorPrint( $result, 'green' );
+        PrintColor( $result, 'green' );
         my $stop = Time::HiRes::gettimeofday();
 
         if ( $timer eq 1 ) {
@@ -58,24 +69,43 @@ sub main() {
         }
     }
     elsif ( $file ne "" ) {
+        if ( $output ne "" ) {
+            if ( $stdout eq 1 ) {
+                $quiet = 0;
+            }
+            else {
+                $quiet = 1;
+            }
+            CleanFile($output);
+        }
         my $start = Time::HiRes::gettimeofday();
         my $line  = "";
         open( DATA, "< ${file}" )
-          or die ColorPrint( "Couldn't open file : ${file}, $!", 'red' );
+          or die PrintColor( "Couldn't open file : ${file}, $!", 'red' );
 
         while (<DATA>) {
             chomp($_);
             $line = $_;
             $lineNumber++;
+
             if ( $verbose eq 1 ) {
                 my $tmp = '=' x 25;
                 $tmp .= "\n";
                 print($tmp);
-                ColorPrint( $line, 'blue' );
+                PrintChar( "*", 'blue' );
+                print("${line}\n");
             }
             $result = ConvertText($line);
+
+            if ( $output ne "" ) {
+
+                open( my $fh, '>>', $output );
+                print( $fh "${result}\n" );
+                close $fh;
+            }
+
             if ( $quiet eq 0 ) {
-                ColorPrint( $result, 'green' );
+                PrintColor( $result, 'green' );
             }
         }
 
@@ -84,10 +114,12 @@ sub main() {
         if ( $timer eq 1 ) {
             my $elapsed = Time::Seconds->new( $stop - $start );
             $elapsed = $elapsed->pretty;
+            PrintChar( "*", 'blue' );
             print("Time elpased : ${elapsed}\n");
         }
 
         if ( $count eq 1 ) {
+            PrintChar( "*", 'blue' );
             print("Number of Line : ${lineNumber}\n");
         }
     }
@@ -96,7 +128,22 @@ sub main() {
     }
 }
 
-sub ColorPrint($$) {
+sub CleanFile($) {
+    my ($file) = @_;
+    open( my $fh, '>', $file );
+    close $fh;
+}
+
+sub PrintChar($$) {
+    my ( $char, $color ) = @_;
+    print("[");
+    print( color($color) );
+    print($char);
+    print( color('reset') );
+    print("] ");
+}
+
+sub PrintColor($$) {
     my ( $data, $color ) = @_;
     print( color($color) );
     print("$data\n");
