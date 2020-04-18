@@ -53,27 +53,35 @@ GetOptions(
     "help|h|?"   => \$help,       # flag
 ) or die($helpText);
 
-sub main() {
-    if ( $help eq 1 ) {
+sub main()
+{
+    if ( $help eq 1 )
+    {
         print( ${helpText} );
     }
-    elsif ( $text ne "" ) {
+    elsif ( $text ne "" )
+    {
         my $start = Time::HiRes::gettimeofday();
         $text   = lc($text);
         $result = ConvertText($text);
         PrintColor( $result, 'green' );
         my $stop = Time::HiRes::gettimeofday();
 
-        if ( $timer eq 1 ) {
+        if ( $timer eq 1 )
+        {
             printf( "%.3f sec\n", $stop - $start );
         }
     }
-    elsif ( $file ne "" ) {
-        if ( $output ne "" ) {
-            if ( $stdout eq 1 ) {
+    elsif ( $file ne "" )
+    {
+        if ( $output ne "" )
+        {
+            if ( $stdout eq 1 )
+            {
                 $quiet = 0;
             }
-            else {
+            else
+            {
                 $quiet = 1;
             }
             CleanFile($output);
@@ -83,12 +91,14 @@ sub main() {
         open( DATA, "< ${file}" )
           or die PrintColor( "Couldn't open file : ${file}, $!", 'red' );
 
-        while (<DATA>) {
+        while (<DATA>)
+        {
             chomp($_);
             $line = $_;
             $lineNumber++;
 
-            if ( $verbose eq 1 ) {
+            if ( $verbose eq 1 )
+            {
                 my $tmp = '=' x 25;
                 $tmp .= "\n";
                 print($tmp);
@@ -97,44 +107,51 @@ sub main() {
             }
             $result = ConvertText($line);
 
-            if ( $output ne "" ) {
+            if ( $output ne "" )
+            {
 
                 open( my $fh, '>>', $output );
                 print( $fh "${result}\n" );
                 close $fh;
             }
 
-            if ( $quiet eq 0 ) {
+            if ( $quiet eq 0 )
+            {
                 PrintColor( $result, 'green' );
             }
         }
 
         my $stop = Time::HiRes::gettimeofday();
 
-        if ( $timer eq 1 ) {
+        if ( $timer eq 1 )
+        {
             my $elapsed = Time::Seconds->new( $stop - $start );
             $elapsed = $elapsed->pretty;
             PrintChar( "*", 'blue' );
             print("Time elpased : ${elapsed}\n");
         }
 
-        if ( $count eq 1 ) {
+        if ( $count eq 1 )
+        {
             PrintChar( "*", 'blue' );
             print("Number of Line : ${lineNumber}\n");
         }
     }
-    else {
+    else
+    {
         print( ${helpText} );
     }
 }
 
-sub CleanFile($) {
+sub CleanFile($)
+{
     my ($file) = @_;
     open( my $fh, '>', $file );
     close $fh;
 }
 
-sub PrintChar($$) {
+sub PrintChar($$)
+{
     my ( $char, $color ) = @_;
     print("[");
     print( color($color) );
@@ -143,20 +160,24 @@ sub PrintChar($$) {
     print("] ");
 }
 
-sub PrintColor($$) {
+sub PrintColor($$)
+{
     my ( $data, $color ) = @_;
     print( color($color) );
     print("$data\n");
     print( color('reset') );
 }
 
-sub ConvertText($) {
+sub ConvertText($)
+{
     my ($ptext) = @_;
     my $presult = "";
 
-    for ( my $i = 0 ; $i < length($ptext) ; $i += 1 ) {
+    for ( my $i = 0 ; $i < length($ptext) ; $i += 1 )
+    {
         my $tmp = substr( $ptext, $i, 1 );
-        if ( $verbose eq 1 ) {
+        if ( $verbose eq 1 )
+        {
             print("substr : $tmp\n");
         }
         $presult .= ConvertChar($tmp);
@@ -165,7 +186,8 @@ sub ConvertText($) {
     return $presult;
 }
 
-sub ConvertChar($) {
+sub ConvertChar($)
+{
     my ($char) = @_;
 
     if    ( $char eq "a" ) { $char = "@"; }
@@ -173,11 +195,13 @@ sub ConvertChar($) {
     elsif ( $char eq "s" ) { $char = "\$"; }
     elsif ( $char eq "o" ) { $char = "0"; }
     elsif ( $char eq "b" ) { $char = "8"; }
-    else {
+    else
+    {
         $char = $char;
     }
 
-    if ( $verbose eq 1 ) {
+    if ( $verbose eq 1 )
+    {
 
         print("char return : $char\n\n");
     }
